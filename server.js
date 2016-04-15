@@ -2,6 +2,7 @@
 
 var express = require("express");
 var moment = require("moment");
+var bodyParser = require('body-parser');
 
 var app = express();
 var port = process.env.PORT || 4000;
@@ -36,9 +37,17 @@ var stubInfo = {
     }
   }
 }
+var backup = JSON.parse(JSON.stringify(stubInfo));
+
+app.use(bodyParser.json({ inflate: true }));
 
 app.get('/', function(req, res) {
   res.send('Hello World!');
+});
+
+app.get('/reset', function(req, res) {
+  stubInfo = JSON.parse(JSON.stringify(backup));
+  res.send(204);
 });
 
 app.get('/notebook', function(req, res) {
@@ -49,6 +58,11 @@ app.get('/notebook/:id', function(req, res) {
 
   res.send(stubInfo[req.params.id] || 404);
 
+});
+
+app.post('/notebook/:id', function(req, res) {
+  stubInfo[req.params.id] = req.body;
+  res.send(204);
 });
 
 app.listen(port, function() {
